@@ -21,7 +21,7 @@ const FetchProjectFiles = async (id) => {
 // insert new project and return its id
 const AddProject = async (author, meta, fileBuffer) => {
     const id = await query("SELECT id FROM Projects WHERE id = (SELECT MAX(id) FROM Projects)");
-
+    const meta = meta.id = id.recordset[0] ? id.recordset[0].id + 1 : 1; // if no projects exist, start at 1
     const result = await query(
         `INSERT INTO Projects (id, author, projectMETA, bs64tarzstsb3)
          OUTPUT INSERTED.id

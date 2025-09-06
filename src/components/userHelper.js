@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { use } = require("react");
 const { v4: uuidv4 } = require("uuid");
+const Date = require("datejs");
+
 
 // Helper function to get user by username
 async function getUserByUsername(username) {
@@ -11,14 +13,19 @@ async function getUserByUsername(username) {
 }
 
 // Helper function to create a new user
-async function createUser(username, email, password) {
+async function createUser(username, email, password, userMETA) {
   const hashedPassword = await bcrypt.hash(password, 10);
   const userId = uuidv4();
+  const userMETA = userMETA.id = userId;
+  const userMETA = userMETA.createdAt = Date.now().toString();
+  const userMETA = userMETA.updatedAt = Date.now().toString();
+  const existingUser = await getUserByUsername(username);
+  if (existingUser) return false; // Username already exists
   await query(
-    "INSERT INTO Users (id, username, email, password, userMETA) VALUES (@id, @username, @email, @password, '{}')",
-    { id: userId, username, email, password: hashedPassword }
+    "INSERT INTO Users (id, username, email, password, userMETA) VALUES (@id, @username, @email, @password, @userMETA)",
+    { id: userId, username, email, password: hashedPassword, userMETA: JSON.stringify(userMETA) }
   );
-  return { id: userId, username, userMETA: userMETA };
+  return { id: userId, username};
 }
 
 // Helper function to verify user credentials
